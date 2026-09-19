@@ -1,0 +1,34 @@
+---
+title: API overview
+description: Automate RailDock projects, services, manifests, servers, organizations, and recovery workflows.
+---
+
+# API overview
+
+RailDock exposes an HTTP API under `/api`. The current API is **not version-prefixed**, so clients should pin the RailDock release they test against and treat the interactive reference as release-coupled documentation.
+
+## Base URL
+
+For a RailDock host at `https://raildock.example.com`, the API base is:
+
+```text
+https://raildock.example.com/api
+```
+
+## Health check
+
+```bash
+curl https://raildock.example.com/api/health
+```
+
+The health endpoint returns status and server time.
+
+## Authentication
+
+Most control-plane endpoints require a bearer JWT. Read [Authentication](/api/authentication).
+
+## Interactive reference
+
+Open the [Scalar API Reference](/api-reference/) for endpoint discovery, schema inspection, and request examples.
+
+> The supplied OpenAPI document is a website/reference companion derived from the current route/controller research. Because the repository does not currently ship a canonical OpenAPI file, validate request bodies and responses against the RailDock release you deploy before generating a strict production SDK.

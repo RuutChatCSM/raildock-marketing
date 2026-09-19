@@ -1,0 +1,16 @@
+---
+title: Databases
+description: Operate datastore services and inspect data in RailDock.
+---
+
+# Databases
+
+Datastores are services with type-specific lifecycle. The service API exposes database information, backups, snapshots, schedules, recovery configuration, and a read-only data browser.
+
+## Data browser
+
+The browser exposes table and row inspection paths. It is intentionally not an advanced write-capable SQL console. Use your normal database tooling for complex administration and keep high-risk data mutations outside casual control-plane browsing.
+
+## Links to applications
+
+Link an application to its datastore and use generated connection data through managed variables where possible. This keeps topology visible to the platform and reduces hard-coded host/port configuration.

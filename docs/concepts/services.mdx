@@ -1,0 +1,20 @@
+---
+title: Services
+description: Application and datastore service lifecycle in RailDock.
+---
+
+# Services
+
+A service is the main unit RailDock deploys and operates. Application services can point at Git source or container images. Datastore services use type-specific lifecycle and recovery operations.
+
+## Common application settings
+
+The current service model includes values such as name, service type/subtype, builder, Git repository, branch, version, port, Docker image, auto-deploy, root directory, start command, maintenance mode, restart policy, external networks, and configuration overrides.
+
+## Lifecycle actions
+
+Depending on service type, actions include deploy, rollback, scale, start, stop, restart, rebuild, run command, enter/terminal, lock/unlock, generate domain, and environment repair. Datastore services expose additional backup and recovery paths.
+
+## Locking
+
+Use service locking when an operational workflow should prevent casual lifecycle changes. The API exposes explicit lock, unlock, and lock-state operations.

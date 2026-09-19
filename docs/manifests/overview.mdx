@@ -1,0 +1,20 @@
+---
+title: Declarative manifests
+description: Reconcile project desired state from raildock.toml, railway.toml, or app.json.
+---
+
+# Declarative manifests
+
+RailDock supports repository-level manifests including `raildock.toml`, `railway.toml`, and `app.json`. A manifest describes project state that can be parsed, compared with current state, previewed, and applied.
+
+## Reconciliation flow
+
+```text
+manifest → parse → validate → diff → plan → confirm risky removals → apply → status
+```
+
+RailDock stores the manifest content and format, tracks synchronization/application timestamps, and exposes drift information so automation does not have to infer whether declared and actual state still match.
+
+## Preview first
+
+Treat preview as part of the normal workflow. The apply endpoint may require explicit confirmation for planned removals, so a CI job should not assume every desired-state change is safe to apply unattended.

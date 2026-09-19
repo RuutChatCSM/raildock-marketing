@@ -1,0 +1,35 @@
+---
+title: Your first project
+description: Create a project, add a service, configure a domain, and deploy it.
+---
+
+# Your first project
+
+A RailDock project is the operational boundary for related services. Services in a project can share an isolated network, reference one another, and participate in project-level deploy and lifecycle actions.
+
+## 1. Create a project
+
+Create the project in the UI or through `POST /api/projects`. Assign the server that should run the project's workloads.
+
+## 2. Add an application service
+
+Choose a Git repository or Docker image. For an application service, configure the values that apply to the source: branch, root directory, builder, start command, exposed port, and auto-deploy preference.
+
+## 3. Add environment variables
+
+Use service variables for configuration specific to one workload. Use project shared variables when several services need the same value. For relationships to datastores or sibling services, prefer explicit service links and cross-service references where available.
+
+## 4. Deploy
+
+Deploy the service directly, or use the project-wide deployment action when you want RailDock to resolve dependencies and deploy the service graph in topological order.
+
+## 5. Watch the result
+
+Follow deployment state and logs. After the process is healthy, add a domain and validate the route.
+
+## Next
+
+- [Git deployments](/deploy/git)
+- [Docker image deployments](/deploy/docker)
+- [Domains and TLS](/deploy/domains-ssl)
+- [Deployment sequencing](/deploy/deploy-sequence)

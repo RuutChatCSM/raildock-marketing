@@ -1,0 +1,35 @@
+---
+title: RailDock documentation
+description: Deploy applications and databases to servers you control with RailDock.
+---
+
+# RailDock documentation
+
+RailDock is a self-hosted platform for deploying and operating applications and databases on infrastructure you control. It combines a web control plane, an HTTP API, declarative project manifests, an SSH-driven deployment engine, project-scoped networking, and data-safety workflows.
+
+## Where to begin
+
+- **New installation:** follow [Install RailDock](/getting-started/install).
+- **First workload:** create a project with [Your first project](/getting-started/first-project).
+- **Understand the system:** read [Architecture](/concepts/architecture).
+- **Manage state from a repository:** start with [Declarative manifests](/manifests/overview).
+- **Automate the control plane:** read the [API overview](/api/overview), then open the [interactive API reference](/api-reference/).
+
+## Product model
+
+A **server** is an execution target. A **project** groups related workloads. An **environment** gives a project an isolated desired state. A **service** is an application or datastore. RailDock connects these concepts to deployment jobs, private networking, domains, variables, backups, activity, and organization access.
+
+```text
+Organization
+├── Servers
+├── Git sources
+├── Backup destinations
+└── Projects
+    └── Environments
+        ├── Application services
+        └── Datastore services
+```
+
+## Current scope
+
+RailDock can manage multiple servers, but a single project currently lives on one server. Preview environments, password reset, and an advanced write-capable database query console are not currently built in. The data browser is read-only.

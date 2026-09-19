@@ -1,0 +1,20 @@
+---
+title: Deploy from Git
+description: Configure source-backed services in RailDock.
+---
+
+# Deploy from Git
+
+Connect a repository-backed service when RailDock should build from source. Configure the repository, branch, optional root directory, builder, start command, port, and automatic-deploy preference.
+
+## Organization Git sources
+
+Organizations can hold Git-source integrations. The API exposes repository, branch, and directory discovery endpoints for supported sources. RailDock also includes GitHub App installation and webhook flows.
+
+## Deployment path
+
+A deploy request creates deployment state and dispatches background execution. Follow the service deployment list and logs instead of assuming a successful request means the workload is already healthy.
+
+## Monorepos
+
+Set `root_directory` for services that should build from a subdirectory. Keep application-specific build instructions close to that service rather than duplicating monorepo logic in external deploy scripts.

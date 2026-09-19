@@ -1,0 +1,18 @@
+{
+  "name": "raildock-docs",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "deploy:holocron": "npx -y @holocron.so/cli deploy --base-path /docs"
+  },
+  "dependencies": {
+    "@holocron.so/vite": "0.32.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "vite": "^8.0.0"
+  }
+}

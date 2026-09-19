@@ -1,0 +1,39 @@
+---
+title: Architecture
+description: Understand the RailDock control plane, deployment engine, jobs, realtime channels, and server runtime.
+---
+
+# Architecture
+
+RailDock separates **control-plane state** from **workload execution**. The web application models projects, services, organizations, manifests, and recovery configuration. Host mutations are delegated to execution engines that connect to servers over SSH.
+
+```text
+Browser
+  ├── /       React frontend
+  ├── /api    Rails API
+  └── /cable  Action Cable
+              │
+              ▼
+        Rails control plane
+        ├── background jobs
+        ├── manifest reconciler
+        ├── DokkuEngine ── SSH ──> Dokku host
+        └── HostEngine  ── SSH ──> Linux host
+```
+
+## Production process
+
+The application is packaged as a single Docker image with nginx, Puma, and background workers supervised together. The React frontend talks to same-origin `/api` endpoints and `/cable` realtime channels.
+
+## Key backend responsibilities
+
+- **Manifest parser / reconciler:** converts a declared desired state into a validated plan.
+- **Deployment sequence jobs:** order dependent services before dispatching service deployments.
+- **Deployment jobs:** execute individual lifecycle transitions.
+- **Project network manager:** creates and validates isolated Docker networking for a project.
+- **Proxy configuration:** generates external proxy state and Traefik labels where applicable.
+- **Recovery jobs:** handle scheduled backup, PITR, snapshot, and drill workflows.
+
+## Server boundary
+
+A RailDock server record contains the connectivity and provisioning context needed to operate a deployment target. A control plane may manage several servers, but one project currently belongs to one server.

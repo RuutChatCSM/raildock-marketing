@@ -1,0 +1,16 @@
+---
+title: Backup destinations
+description: Configure and verify organization-level off-site recovery destinations.
+---
+
+# Backup destinations
+
+Backup destinations belong to the organization layer so several protected services can use centrally managed recovery storage. RailDock exposes create, update, delete, default-setting, and verification operations.
+
+## Verify immediately
+
+After adding credentials or destination configuration, use the verification endpoint before assigning critical backup schedules. A syntactically valid destination is not necessarily reachable or writable.
+
+## Credentials
+
+Treat destination credentials as production secrets. Restrict them to the minimum storage permissions needed for the backup/recovery workflow and rotate them according to your infrastructure policy.

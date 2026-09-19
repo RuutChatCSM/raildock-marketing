@@ -1,0 +1,33 @@
+---
+title: Manifest reference
+description: Practical RailDock manifest structure and compatibility notes.
+---
+
+# Manifest reference
+
+The repository currently recognizes three manifest families: `raildock.toml`, `railway.toml`, and `app.json`. Exact accepted fields depend on the parser version running in your RailDock release.
+
+## Service intent
+
+A service declaration can describe application or datastore identity, source/image information, runtime configuration, dependencies, and environment values.
+
+```toml
+# Conceptual example — validate exact field names with your running RailDock parser.
+[services.api]
+source = "github:acme/api"
+branch = "main"
+port = 3000
+depends_on = ["postgres"]
+
+[services.api.env]
+DATABASE_URL = "${postgres.DATABASE_URL}"
+
+[services.postgres]
+type = "postgres"
+```
+
+> The snippet illustrates the desired model. Before committing a production manifest, use RailDock's parser/preview in the release you run to validate the exact syntax and supported fields.
+
+## Compatibility files
+
+`railway.toml` and `app.json` support lets repositories carry configuration from adjacent deployment ecosystems, while `raildock.toml` is the natural place for RailDock-specific desired state.

@@ -1,0 +1,16 @@
+---
+title: Project networking
+description: Understand RailDock private service networking and DNS discovery.
+---
+
+# Project networking
+
+RailDock creates isolated Docker networks for projects and uses service discovery to keep private communication inside the project boundary. External networks can also be attached when a service needs an explicitly shared network.
+
+## Prefer private connectivity
+
+Do not publish a database merely so an application on the same project can reach it. Use the project network and service link model for east-west traffic, then expose only the public application surface that actually needs ingress.
+
+## Inspect host networks
+
+Server resources expose network inspection and validation. Use them when imported workloads, external proxying, or manual host changes have created unexpected connectivity.

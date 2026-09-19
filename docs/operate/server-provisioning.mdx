@@ -1,0 +1,21 @@
+---
+title: Server provisioning
+description: Attach, test, provision, and validate RailDock execution targets.
+---
+
+# Server provisioning
+
+Servers are RailDock's execution targets. The API exposes create/update/delete, connectivity test, provisioning, provisioning status, validation, host metrics, and network inspection.
+
+## Provisioning flow
+
+1. Create the server record with its connection information.
+2. Test connectivity.
+3. Start provisioning with the appropriate proxy mode and options.
+4. Follow provisioning status.
+5. Run validation and review detected runtime information.
+6. Assign a project only after the host is ready.
+
+## Validation data
+
+Validation can update detected server status, software version, OS information, uptime, proxy state, and public IP information. Treat validation as a current observation, not a permanent guarantee of host health.

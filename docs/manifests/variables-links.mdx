@@ -1,0 +1,20 @@
+---
+title: Variables, links, and dependencies
+description: Connect RailDock services without hard-coding private endpoints.
+---
+
+# Variables, links, and dependencies
+
+Service links make application relationships part of the project model. Cross-service variable references let an application consume connection data exposed by another service without copying generated endpoints into several configuration screens.
+
+## Dependency graph
+
+When service A depends on service B, model that relationship explicitly. Project-wide deployment can then order B before A.
+
+## Shared variables
+
+Projects expose shared-variable operations for values used by several services. Keep secrets at the narrowest useful scope and avoid duplicating the same secret into unrelated services only for convenience.
+
+## Repairing environment state
+
+The service API includes an environment-repair action. Use it when managed runtime variables have diverged from RailDock's expected state, after first understanding why the drift occurred.

@@ -1,0 +1,20 @@
+---
+title: Domains and TLS
+description: Route public traffic to RailDock services.
+---
+
+# Domains and TLS
+
+Domains are attached to services. Application services can create and delete domain records, and RailDock also exposes generated-domain and proxy configuration paths.
+
+## Before attaching a domain
+
+1. Confirm the service process is healthy.
+2. Confirm the expected application port is configured.
+3. Point DNS at the public ingress for the target server.
+4. Add the domain in RailDock.
+5. Validate the external route and TLS behavior.
+
+## External proxy mode
+
+RailDock includes external proxy configuration and Traefik label generation. If your environment already owns the edge proxy, read [External proxy mode](/operate/external-proxy) before assuming RailDock should replace it.

@@ -1,0 +1,24 @@
+---
+title: Reconciliation and drift
+description: How RailDock plans and applies desired-state changes.
+---
+
+# Reconciliation and drift
+
+Reconciliation compares the stored desired state with the actual RailDock model and builds targeted changes. It is not equivalent to redeploying every service on every edit.
+
+## Change severity
+
+Conceptually, changes fall into operational classes:
+
+- **Reconfigure:** values that can be updated without rebuilding source.
+- **Restart:** runtime changes that require the process to restart.
+- **Redeploy:** source, image, or build-sensitive changes requiring a rebuild/release path.
+
+## Drift
+
+Use the manifest drift endpoint to surface divergence instead of silently treating the UI and repository as equally authoritative. Establish one operating rule for your team: either repository state is authoritative for managed fields, or UI changes must be folded back into the manifest before the next apply.
+
+## Removals
+
+An apply can stop when the plan contains removals that need explicit confirmation. Automation should handle that state as a review gate, not bypass it generically.

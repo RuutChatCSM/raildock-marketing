@@ -1,0 +1,21 @@
+---
+title: Backups
+description: Create, schedule, download, restore, and remove service backups.
+---
+
+# Backups
+
+RailDock exposes on-demand backup, backup schedule, download, restore, and delete operations for supported services.
+
+## Recommended operating sequence
+
+1. Create an organization backup destination.
+2. Verify that destination from RailDock.
+3. Create a schedule for each production datastore that needs protection.
+4. Check that backups are actually completing.
+5. Run a recovery drill on a regular cadence.
+6. Document any service-specific restore caveats.
+
+## Do not confuse scheduling with recovery readiness
+
+A cron-like schedule proves that a job is configured, not that the archive is restorable. Verification and recovery drills close that gap.

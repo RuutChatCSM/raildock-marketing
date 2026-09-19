@@ -1,0 +1,16 @@
+---
+title: Deploy a Docker image
+description: Run image-backed services without rebuilding source in RailDock.
+---
+
+# Deploy a Docker image
+
+Set a service's Docker image when the artifact is already built and RailDock should operate the runtime lifecycle rather than build the source itself.
+
+## Image changes and desired state
+
+Image identity is build-sensitive state. When a declarative sync changes the image, RailDock can classify that delta as requiring a redeploy rather than treating it like an environment-only reconfiguration.
+
+## Imported workloads
+
+Server resources include Docker import workflows. Use these paths when bringing an existing host workload under RailDock rather than recreating everything manually. Review imported configuration before treating it as fully managed state.

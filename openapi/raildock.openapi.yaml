@@ -1,0 +1,6130 @@
+openapi: 3.1.0
+info:
+  title: RailDock API
+  version: main-2026-09-19
+  description: HTTP API for the RailDock control plane. This reference is derived from the public main-branch Rails
+    routes and controller behavior researched on 2026-09-19. The repository does not currently ship a canonical
+    OpenAPI document, so request/response schemas that are not explicit in controller code are intentionally permissive.
+    Validate strict SDK models against the RailDock release you deploy.
+  license:
+    name: MIT
+    identifier: MIT
+externalDocs:
+  description: RailDock project source
+  url: https://github.com/mona-chen/raildock
+servers:
+- url: /api
+  description: Same-origin RailDock control plane
+- url: http://localhost:8888/api
+  description: Local/default installation
+tags:
+- name: Health
+  description: Control-plane health and bootstrap state.
+- name: Auth
+  description: User authentication and current-user identity.
+- name: Webhooks
+  description: Inbound deployment and integration callbacks.
+- name: Projects
+  description: Project lifecycle and project-wide operations.
+- name: Environments
+  description: Project environment lifecycle and synchronization.
+- name: Manifests
+  description: Declarative desired-state documents, previews, apply jobs and drift.
+- name: Services
+  description: Application and datastore service lifecycle.
+- name: Deployments
+  description: Deployment history, state and cancellation.
+- name: Configuration
+  description: Environment variables, domains, storage and service configuration.
+- name: Databases
+  description: Database metadata and read-only data browsing.
+- name: Recovery
+  description: Backups, schedules, destinations, snapshots, PITR and recovery drills.
+- name: Servers
+  description: Deployment target creation, provisioning, validation, metrics and imports.
+- name: Organizations
+  description: Organization lifecycle and shared operational resources.
+- name: Members
+  description: Organization membership and invitation workflows.
+- name: Git Sources
+  description: Repository integrations and source discovery.
+- name: Deploy Keys
+  description: Automation/deployment credentials.
+- name: Templates
+  description: Application templates and template deployment.
+- name: Activity
+  description: Project and organization activity history.
+- name: Modules
+  description: Installable RailDock modules/plugins.
+- name: Admin
+  description: Administrative configuration, data safety and updates.
+- name: GitHub App
+  description: GitHub App manifest, installation and webhook lifecycle.
+paths:
+  /health:
+    get:
+      tags:
+      - Health
+      summary: Check API health
+      operationId: get_check_api_health_health
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+  /setup:
+    get:
+      tags:
+      - Health
+      summary: Read initial setup state
+      operationId: get_read_initial_setup_state_setup
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+  /users:
+    post:
+      tags:
+      - Auth
+      summary: Create the initial user
+      operationId: post_create_the_initial_user_users
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      security: []
+  /login:
+    post:
+      tags:
+      - Auth
+      summary: Authenticate with email and password
+      operationId: post_authenticate_with_email_and_password_login
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      security: []
+  /me:
+    get:
+      tags:
+      - Auth
+      summary: Get the current user
+      operationId: get_get_the_current_user_me
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /webhooks/deploy:
+    post:
+      tags:
+      - Webhooks
+      summary: Trigger deployment webhook
+      operationId: post_trigger_deployment_webhook_webhooks_deploy
+      responses:
+        '200':
+          description: Successful response
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      security: []
+  /webhooks/deploy/{service_id}:
+    post:
+      tags:
+      - Webhooks
+      summary: Trigger service deployment webhook
+      operationId: post_trigger_service_deployment_webhook_webhooks_deploy_service_id
+      responses:
+        '200':
+          description: Successful response
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      security: []
+  /modules:
+    get:
+      tags:
+      - Modules
+      summary: List modules
+      operationId: get_list_modules_modules
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /modules/{module_id}/install:
+    post:
+      tags:
+      - Modules
+      summary: Install a module
+      operationId: post_install_a_module_modules_module_install
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: module_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /modules/{module_id}/enable:
+    post:
+      tags:
+      - Modules
+      summary: Enable a module
+      operationId: post_enable_a_module_modules_module_enable
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: module_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /modules/{module_id}/disable:
+    post:
+      tags:
+      - Modules
+      summary: Disable a module
+      operationId: post_disable_a_module_modules_module_disable
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: module_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /modules/{module_id}/uninstall:
+    delete:
+      tags:
+      - Modules
+      summary: Uninstall a module
+      operationId: delete_uninstall_a_module_modules_module_uninstall
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: module_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /modules/{module_id}/settings:
+    get:
+      tags:
+      - Modules
+      summary: Read module settings
+      operationId: get_read_module_settings_modules_module_settings
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: module_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+      - Modules
+      summary: Update module settings
+      operationId: patch_update_module_settings_modules_module_settings
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: module_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects:
+    get:
+      tags:
+      - Projects
+      summary: List projects
+      operationId: get_list_projects_projects
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+      - Projects
+      summary: Create a project
+      operationId: post_create_a_project_projects
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}:
+    get:
+      tags:
+      - Projects
+      summary: Get a project
+      operationId: get_get_a_project_projects_project_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+      - Projects
+      summary: Update a project
+      operationId: patch_update_a_project_projects_project_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Projects
+      summary: Delete a project
+      operationId: delete_delete_a_project_projects_project_id
+      responses:
+        '200':
+          description: Project deleted or deletion state returned
+        '428':
+          description: Safety precondition or explicit confirmation required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Destructive project deletion can require a typed confirmation and/or safety snapshot precondition.
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteConfirmation'
+  /projects/{project_id}/activity:
+    get:
+      tags:
+      - Projects
+      summary: Get project activity
+      operationId: get_get_project_activity_projects_project_activity
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/shared_vars:
+    get:
+      tags:
+      - Projects
+      summary: Get project shared variables
+      operationId: get_get_project_shared_variables_projects_project_shared_vars
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/deploy_all:
+    post:
+      tags:
+      - Projects
+      summary: Deploy all project services
+      operationId: post_deploy_all_project_services_projects_project_deploy_all
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/cancel_deployments:
+    post:
+      tags:
+      - Projects
+      summary: Cancel project deployments
+      operationId: post_cancel_project_deployments_projects_project_cancel_deployments
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/restart_all:
+    post:
+      tags:
+      - Projects
+      summary: Restart all project services
+      operationId: post_restart_all_project_services_projects_project_restart_all
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/stop_all:
+    post:
+      tags:
+      - Projects
+      summary: Stop all project services
+      operationId: post_stop_all_project_services_projects_project_stop_all
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/environments:
+    get:
+      tags:
+      - Environments
+      summary: List project environments
+      operationId: get_list_project_environments_projects_project_environments
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Environment'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Environments
+      summary: Create an environment
+      operationId: post_create_an_environment_projects_project_environments
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/environments/{environment_id}:
+    patch:
+      tags:
+      - Environments
+      summary: Update an environment
+      operationId: patch_update_an_environment_projects_project_environments_environment_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: environment_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Environments
+      summary: Delete an environment
+      operationId: delete_delete_an_environment_projects_project_environments_environment_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: environment_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/environments/{environment_id}/duplicate:
+    post:
+      tags:
+      - Environments
+      summary: Duplicate an environment
+      operationId: post_duplicate_an_environment_projects_project_environments_environment_duplicate
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: environment_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/environments/{environment_id}/sync_plan:
+    get:
+      tags:
+      - Environments
+      summary: Preview environment synchronization
+      operationId: get_preview_environment_synchronization_projects_project_environments_environment_sync_plan
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: environment_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/environments/{environment_id}/sync:
+    post:
+      tags:
+      - Environments
+      summary: Synchronize an environment
+      operationId: post_synchronize_an_environment_projects_project_environments_environment_sync
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: environment_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/repository-import/preview:
+    post:
+      tags:
+      - Projects
+      summary: Preview repository import
+      operationId: post_preview_repository_import_projects_project_repository_import_preview
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/repository-import/apply:
+    post:
+      tags:
+      - Projects
+      summary: Apply repository import
+      operationId: post_apply_repository_import_projects_project_repository_import_apply
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/manifest:
+    get:
+      tags:
+      - Manifests
+      summary: Get project manifest
+      operationId: get_get_project_manifest_projects_project_manifest
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestDocument'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+      - Manifests
+      summary: Update and validate project manifest
+      operationId: patch_update_and_validate_project_manifest_projects_project_manifest
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Stores manifest content and previews its desired-state delta.
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - content
+              properties:
+                content:
+                  type: string
+                format:
+                  type: string
+  /projects/{project_id}/manifest/preview:
+    post:
+      tags:
+      - Manifests
+      summary: Preview manifest changes
+      operationId: post_preview_manifest_changes_projects_project_manifest_preview
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/manifest/apply:
+    post:
+      tags:
+      - Manifests
+      summary: Apply manifest desired state
+      operationId: post_apply_manifest_desired_state_projects_project_manifest_apply
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: May stop for explicit confirmation when the plan includes removals.
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/manifest/status:
+    get:
+      tags:
+      - Manifests
+      summary: Get manifest apply status
+      operationId: get_get_manifest_apply_status_projects_project_manifest_status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/manifest/drift:
+    get:
+      tags:
+      - Manifests
+      summary: Get manifest drift report
+      operationId: get_get_manifest_drift_report_projects_project_manifest_drift
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/manifest/merge:
+    post:
+      tags:
+      - Manifests
+      summary: Merge current state into manifest
+      operationId: post_merge_current_state_into_manifest_projects_project_manifest_merge
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /projects/{project_id}/services:
+    get:
+      tags:
+      - Services
+      summary: List project services
+      operationId: get_list_project_services_projects_project_services
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Services
+      summary: Create a service
+      operationId: post_create_a_service_projects_project_services
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}:
+    get:
+      tags:
+      - Services
+      summary: Get a service
+      operationId: get_get_a_service_services_service_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+      - Services
+      summary: Update a service
+      operationId: patch_update_a_service_services_service_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Services
+      summary: Delete a service
+      operationId: delete_delete_a_service_services_service_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Service destruction is a guarded operation and may require explicit confirmation.
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteConfirmation'
+  /services/{service_id}/deploy:
+    post:
+      tags:
+      - Services
+      summary: Deploy service
+      operationId: post_deploy_service_services_service_deploy
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/rollback:
+    post:
+      tags:
+      - Services
+      summary: Roll back service
+      operationId: post_roll_back_service_services_service_rollback
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/start:
+    post:
+      tags:
+      - Services
+      summary: Start service
+      operationId: post_start_service_services_service_start
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/stop:
+    post:
+      tags:
+      - Services
+      summary: Stop service
+      operationId: post_stop_service_services_service_stop
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/restart:
+    post:
+      tags:
+      - Services
+      summary: Restart service
+      operationId: post_restart_service_services_service_restart
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/rebuild:
+    post:
+      tags:
+      - Services
+      summary: Rebuild service
+      operationId: post_rebuild_service_services_service_rebuild
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/enter:
+    post:
+      tags:
+      - Services
+      summary: Open service terminal session
+      operationId: post_open_service_terminal_session_services_service_enter
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/app_lock:
+    post:
+      tags:
+      - Services
+      summary: Lock service
+      operationId: post_lock_service_services_service_app_lock
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/unlock:
+    post:
+      tags:
+      - Services
+      summary: Unlock service
+      operationId: post_unlock_service_services_service_unlock
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/generate_domain:
+    post:
+      tags:
+      - Services
+      summary: Generate service domain
+      operationId: post_generate_service_domain_services_service_generate_domain
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/repair_env:
+    post:
+      tags:
+      - Services
+      summary: Repair service environment
+      operationId: post_repair_service_environment_services_service_repair_env
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/scale:
+    post:
+      tags:
+      - Services
+      summary: Scale service processes
+      operationId: post_scale_service_processes_services_service_scale
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/logs:
+    get:
+      tags:
+      - Services
+      summary: Get service logs
+      operationId: get_get_service_logs_services_service_logs
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lines
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+  /services/{service_id}/metrics:
+    get:
+      tags:
+      - Services
+      summary: Get current service metrics
+      operationId: get_get_current_service_metrics_services_service_metrics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/metrics_history:
+    get:
+      tags:
+      - Services
+      summary: Get service metrics history
+      operationId: get_get_service_metrics_history_services_service_metrics_history
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/container_status:
+    get:
+      tags:
+      - Services
+      summary: Get container status
+      operationId: get_get_container_status_services_service_container_status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/database_info:
+    get:
+      tags:
+      - Databases
+      summary: Get database information
+      operationId: get_get_database_information_services_service_database_info
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/backups:
+    get:
+      tags:
+      - Recovery
+      summary: List service backups
+      operationId: get_list_service_backups_services_service_backups
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Backup'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/snapshots:
+    get:
+      tags:
+      - Recovery
+      summary: List service snapshots
+      operationId: get_list_service_snapshots_services_service_snapshots
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/backup_schedules:
+    get:
+      tags:
+      - Recovery
+      summary: List backup schedules
+      operationId: get_list_backup_schedules_services_service_backup_schedules
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BackupSchedule'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Recovery
+      summary: Create backup schedule
+      operationId: post_create_backup_schedule_services_service_backup_schedules
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupSchedule'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/backup:
+    post:
+      tags:
+      - Recovery
+      summary: Create service backup
+      operationId: post_create_service_backup_services_service_backup
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Backup'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/restore:
+    post:
+      tags:
+      - Recovery
+      summary: Restore service
+      operationId: post_restore_service_services_service_restore
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/run:
+    post:
+      tags:
+      - Services
+      summary: Run one-off command
+      operationId: post_run_one_off_command_services_service_run
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: The command field is required.
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCommandRequest'
+  /services/{service_id}/lock_state:
+    get:
+      tags:
+      - Services
+      summary: Get service lock state
+      operationId: get_get_service_lock_state_services_service_lock_state
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/link:
+    post:
+      tags:
+      - Services
+      summary: Link service dependency
+      operationId: post_link_service_dependency_services_service_link
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/unlink:
+    delete:
+      tags:
+      - Services
+      summary: Unlink service dependency
+      operationId: delete_unlink_service_dependency_services_service_unlink
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/linked_by:
+    get:
+      tags:
+      - Services
+      summary: List services linked to this service
+      operationId: get_list_services_linked_to_this_service_services_service_linked_by
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/services/config_show:
+    get:
+      tags:
+      - Configuration
+      summary: Show project service configuration
+      operationId: get_show_project_service_configuration_projects_project_services_config_show
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/services/traefik_config:
+    get:
+      tags:
+      - Configuration
+      summary: Show generated Traefik configuration
+      operationId: get_show_generated_traefik_configuration_projects_project_services_traefik_config
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /projects/{project_id}/services/storage_list:
+    get:
+      tags:
+      - Configuration
+      summary: List service storage configuration
+      operationId: get_list_service_storage_configuration_projects_project_services_storage_list
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/deployments:
+    get:
+      tags:
+      - Deployments
+      summary: List service deployments
+      operationId: get_list_service_deployments_services_service_deployments
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Deployment'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/deployments/{deployment_id}:
+    get:
+      tags:
+      - Deployments
+      summary: Get deployment
+      operationId: get_get_deployment_services_service_deployments_deployment_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deployment_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/deployments/{deployment_id}/cancel:
+    post:
+      tags:
+      - Deployments
+      summary: Cancel deployment
+      operationId: post_cancel_deployment_services_service_deployments_deployment_cancel
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deployment_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/env-vars:
+    post:
+      tags:
+      - Configuration
+      summary: Create service environment variable
+      operationId: post_create_service_environment_variable_services_service_env_vars
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/env-vars/bulk:
+    patch:
+      tags:
+      - Configuration
+      summary: Bulk update service environment variables
+      operationId: patch_bulk_update_service_environment_variables_services_service_env_vars_bulk
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/env-vars/{env_var_id}:
+    delete:
+      tags:
+      - Configuration
+      summary: Delete service environment variable
+      operationId: delete_delete_service_environment_variable_services_service_env_vars_env_var_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: env_var_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/domains:
+    post:
+      tags:
+      - Configuration
+      summary: Create service domain
+      operationId: post_create_service_domain_services_service_domains
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/domains/{domain_id}:
+    delete:
+      tags:
+      - Configuration
+      summary: Delete service domain
+      operationId: delete_delete_service_domain_services_service_domains_domain_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: domain_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/storages:
+    post:
+      tags:
+      - Configuration
+      summary: Create service storage mount
+      operationId: post_create_service_storage_mount_services_service_storages
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/storages/{storage_id}:
+    delete:
+      tags:
+      - Configuration
+      summary: Delete service storage mount
+      operationId: delete_delete_service_storage_mount_services_service_storages_storage_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: storage_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/storages/{storage_id}/browse:
+    get:
+      tags:
+      - Configuration
+      summary: Browse storage contents
+      operationId: get_browse_storage_contents_services_service_storages_storage_browse
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: storage_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/database/tables:
+    get:
+      tags:
+      - Databases
+      summary: List database tables
+      operationId: get_list_database_tables_services_service_database_tables
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/database/tables/{table}/rows:
+    get:
+      tags:
+      - Databases
+      summary: Browse database rows
+      operationId: get_browse_database_rows_services_service_database_tables_table_rows
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Read-only data browser.
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: table
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+  /services/{service_id}/backup_schedules/{schedule_id}:
+    patch:
+      tags:
+      - Recovery
+      summary: Update backup schedule
+      operationId: patch_update_backup_schedule_services_service_backup_schedules_schedule_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupSchedule'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: schedule_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Recovery
+      summary: Delete backup schedule
+      operationId: delete_delete_backup_schedule_services_service_backup_schedules_schedule_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: schedule_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/backups/{backup_id}/download:
+    get:
+      tags:
+      - Recovery
+      summary: Download backup
+      operationId: get_download_backup_services_service_backups_backup_download
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: backup_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/backups/{backup_id}/restore:
+    post:
+      tags:
+      - Recovery
+      summary: Restore backup
+      operationId: post_restore_backup_services_service_backups_backup_restore
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: backup_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/backups/{backup_id}:
+    delete:
+      tags:
+      - Recovery
+      summary: Delete backup
+      operationId: delete_delete_backup_services_service_backups_backup_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: backup_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/recovery:
+    get:
+      tags:
+      - Recovery
+      summary: Get service recovery configuration
+      operationId: get_get_service_recovery_configuration_services_service_recovery
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/recovery/destinations:
+    post:
+      tags:
+      - Recovery
+      summary: Create service recovery destination
+      operationId: post_create_service_recovery_destination_services_service_recovery_destinations
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/recovery/destinations/{destination_id}/verify:
+    post:
+      tags:
+      - Recovery
+      summary: Verify service recovery destination
+      operationId: post_verify_service_recovery_destination_services_service_recovery_destinations_destination_verify
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: destination_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/recovery/destinations/{destination_id}:
+    delete:
+      tags:
+      - Recovery
+      summary: Delete service recovery destination
+      operationId: delete_delete_service_recovery_destination_services_service_recovery_destinations_destination_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: destination_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/recovery/volume-snapshot:
+    post:
+      tags:
+      - Recovery
+      summary: Create volume snapshot
+      operationId: post_create_volume_snapshot_services_service_recovery_volume_snapshot
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/recovery/pitr:
+    put:
+      tags:
+      - Recovery
+      summary: Configure point-in-time recovery
+      operationId: put_configure_point_in_time_recovery_services_service_recovery_pitr
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Recovery
+      summary: Disable point-in-time recovery
+      operationId: delete_disable_point_in_time_recovery_services_service_recovery_pitr
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /services/{service_id}/recovery/drill:
+    post:
+      tags:
+      - Recovery
+      summary: Start recovery drill
+      operationId: post_start_recovery_drill_services_service_recovery_drill
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /services/{service_id}/recovery/preferences:
+    patch:
+      tags:
+      - Recovery
+      summary: Update recovery preferences
+      operationId: patch_update_recovery_preferences_services_service_recovery_preferences
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: service_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers:
+    get:
+      tags:
+      - Servers
+      summary: List servers
+      operationId: get_list_servers_servers
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Server'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+      - Servers
+      summary: Create a server
+      operationId: post_create_a_server_servers
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers/{server_id}:
+    get:
+      tags:
+      - Servers
+      summary: Get a server
+      operationId: get_get_a_server_servers_server_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+      - Servers
+      summary: Update a server
+      operationId: patch_update_a_server_servers_server_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Servers
+      summary: Delete a server
+      operationId: delete_delete_a_server_servers_server_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /servers/test:
+    post:
+      tags:
+      - Servers
+      summary: Test server connectivity
+      operationId: post_test_server_connectivity_servers_test
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers/{server_id}/provision:
+    post:
+      tags:
+      - Servers
+      summary: Provision server
+      operationId: post_provision_server_servers_server_provision
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Queues server provisioning using connection and proxy-mode settings.
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers/{server_id}/provision_status:
+    get:
+      tags:
+      - Servers
+      summary: Get server provisioning status
+      operationId: get_get_server_provisioning_status_servers_server_provision_status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /servers/{server_id}/validate:
+    post:
+      tags:
+      - Servers
+      summary: Validate server
+      operationId: post_validate_server_servers_server_validate
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Refreshes observed host/runtime state such as status, versions, OS, uptime, proxy and public
+        IP.
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers/{server_id}/metrics:
+    get:
+      tags:
+      - Servers
+      summary: Get host metrics
+      operationId: get_get_host_metrics_servers_server_metrics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /servers/{server_id}/networks:
+    get:
+      tags:
+      - Servers
+      summary: List server networks
+      operationId: get_list_server_networks_servers_server_networks
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /servers/{server_id}/networks/validate:
+    post:
+      tags:
+      - Servers
+      summary: Validate server networks
+      operationId: post_validate_server_networks_servers_server_networks_validate
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers/{server_id}/docker-imports:
+    get:
+      tags:
+      - Servers
+      summary: List Docker import candidates
+      operationId: get_list_docker_import_candidates_servers_server_docker_imports
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Servers
+      summary: Import Docker workload
+      operationId: post_import_docker_workload_servers_server_docker_imports
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /servers/{server_id}/unmanaged-datastores:
+    get:
+      tags:
+      - Servers
+      summary: List unmanaged datastores
+      operationId: get_list_unmanaged_datastores_servers_server_unmanaged_datastores
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /servers/{server_id}/unmanaged-datastores/{datastore_id}/adopt:
+    post:
+      tags:
+      - Servers
+      summary: Adopt unmanaged datastore
+      operationId: post_adopt_unmanaged_datastore_servers_server_unmanaged_datastores_datastore_adopt
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datastore_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations:
+    get:
+      tags:
+      - Organizations
+      summary: List organizations
+      operationId: get_list_organizations_organizations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+      - Organizations
+      summary: Create organization
+      operationId: post_create_organization_organizations
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations/{organization_id}:
+    get:
+      tags:
+      - Organizations
+      summary: Get organization
+      operationId: get_get_organization_organizations_organization_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+      - Organizations
+      summary: Update organization
+      operationId: patch_update_organization_organizations_organization_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Organizations
+      summary: Delete organization
+      operationId: delete_delete_organization_organizations_organization_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/projects:
+    get:
+      tags:
+      - Organizations
+      summary: List organization projects
+      operationId: get_list_organization_projects_organizations_organization_projects
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/server_bootstrap:
+    get:
+      tags:
+      - Organizations
+      summary: Get server bootstrap information
+      operationId: get_get_server_bootstrap_information_organizations_organization_server_bootstrap
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/data_safety:
+    get:
+      tags:
+      - Recovery
+      summary: Get organization data-safety configuration
+      operationId: get_get_organization_data_safety_configuration_organizations_organization_data_safety
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/git-sources:
+    get:
+      tags:
+      - Git Sources
+      summary: List organization Git sources
+      operationId: get_list_organization_git_sources_organizations_organization_git_sources
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Git Sources
+      summary: Create organization Git source
+      operationId: post_create_organization_git_source_organizations_organization_git_sources
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations/{organization_id}/git-sources/{git_source_id}/repos:
+    get:
+      tags:
+      - Git Sources
+      summary: List Git source repos
+      operationId: get_list_git_source_repos_organizations_organization_git_sources_git_source_repos
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/git-sources/{git_source_id}/branches:
+    get:
+      tags:
+      - Git Sources
+      summary: List Git source branches
+      operationId: get_list_git_source_branches_organizations_organization_git_sources_git_source_branches
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/git-sources/{git_source_id}/directories:
+    get:
+      tags:
+      - Git Sources
+      summary: List Git source directories
+      operationId: get_list_git_source_directories_organizations_organization_git_sources_git_source_directories
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/git-sources/{git_source_id}:
+    delete:
+      tags:
+      - Git Sources
+      summary: Delete organization Git source
+      operationId: delete_delete_organization_git_source_organizations_organization_git_sources_git_source_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/members:
+    get:
+      tags:
+      - Members
+      summary: List organization members
+      operationId: get_list_organization_members_organizations_organization_members
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/members/{member_id}:
+    patch:
+      tags:
+      - Members
+      summary: Update organization member
+      operationId: patch_update_organization_member_organizations_organization_members_member_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: member_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Members
+      summary: Remove organization member
+      operationId: delete_remove_organization_member_organizations_organization_members_member_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: member_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/invitations:
+    get:
+      tags:
+      - Members
+      summary: List organization invitations
+      operationId: get_list_organization_invitations_organizations_organization_invitations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Members
+      summary: Create organization invitation
+      operationId: post_create_organization_invitation_organizations_organization_invitations
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations/{organization_id}/invitations/{invitation_id}:
+    delete:
+      tags:
+      - Members
+      summary: Revoke organization invitation
+      operationId: delete_revoke_organization_invitation_organizations_organization_invitations_invitation_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: invitation_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /invitations/{token}:
+    get:
+      tags:
+      - Members
+      summary: Get invitation by token
+      operationId: get_get_invitation_by_token_invitations_token
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      security: []
+  /invitations/{token}/accept:
+    post:
+      tags:
+      - Members
+      summary: Accept invitation
+      operationId: post_accept_invitation_invitations_token_accept
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      security: []
+  /organizations/{organization_id}/deploy-keys:
+    get:
+      tags:
+      - Deploy Keys
+      summary: List deploy keys
+      operationId: get_list_deploy_keys_organizations_organization_deploy_keys
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Deploy Keys
+      summary: Create deploy key
+      operationId: post_create_deploy_key_organizations_organization_deploy_keys
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations/{organization_id}/deploy-keys/{deploy_key_id}:
+    delete:
+      tags:
+      - Deploy Keys
+      summary: Delete deploy key
+      operationId: delete_delete_deploy_key_organizations_organization_deploy_keys_deploy_key_id
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploy_key_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/backup-destinations:
+    get:
+      tags:
+      - Recovery
+      summary: List organization backup destinations
+      operationId: get_list_organization_backup_destinations_organizations_organization_backup_destinations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+      - Recovery
+      summary: Create organization backup destination
+      operationId: post_create_organization_backup_destination_organizations_organization_backup_destinations
+      responses:
+        '201':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations/{organization_id}/backup-destinations/{destination_id}:
+    patch:
+      tags:
+      - Recovery
+      summary: Update organization backup destination
+      operationId: patch_update_organization_backup_destination_organizations_organization_backup_destinations_destinat
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: destination_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags:
+      - Recovery
+      summary: Delete organization backup destination
+      operationId: delete_delete_organization_backup_destination_organizations_organization_backup_destinations_destina
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: destination_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /organizations/{organization_id}/backup-destinations/defaults:
+    patch:
+      tags:
+      - Recovery
+      summary: Update backup destination defaults
+      operationId: patch_update_backup_destination_defaults_organizations_organization_backup_destinations_defaults
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /organizations/{organization_id}/backup-destinations/{destination_id}/verify:
+    post:
+      tags:
+      - Recovery
+      summary: Verify organization backup destination
+      operationId: post_verify_organization_backup_destination_organizations_organization_backup_destinations_destinati
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: destination_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /git_sources:
+    get:
+      tags:
+      - Git Sources
+      summary: List accessible Git sources
+      operationId: get_list_accessible_git_sources_git_sources
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /git_sources/{git_source_id}/repos:
+    get:
+      tags:
+      - Git Sources
+      summary: List accessible Git source repos
+      operationId: get_list_accessible_git_source_repos_git_sources_git_source_repos
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /git_sources/{git_source_id}/branches:
+    get:
+      tags:
+      - Git Sources
+      summary: List accessible Git source branches
+      operationId: get_list_accessible_git_source_branches_git_sources_git_source_branches
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /git_sources/{git_source_id}/directories:
+    get:
+      tags:
+      - Git Sources
+      summary: List accessible Git source directories
+      operationId: get_list_accessible_git_source_directories_git_sources_git_source_directories
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: git_source_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /deploy_keys:
+    get:
+      tags:
+      - Deploy Keys
+      summary: List accessible deploy keys
+      operationId: get_list_accessible_deploy_keys_deploy_keys
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /templates:
+    get:
+      tags:
+      - Templates
+      summary: List templates
+      operationId: get_list_templates_templates
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /templates/{template_id}:
+    get:
+      tags:
+      - Templates
+      summary: Get template
+      operationId: get_get_template_templates_template_id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: template_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /templates/{template_id}/deploy:
+    post:
+      tags:
+      - Templates
+      summary: Deploy template
+      operationId: post_deploy_template_templates_template_deploy
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: template_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /activity:
+    get:
+      tags:
+      - Activity
+      summary: List global activity
+      operationId: get_list_global_activity_activity
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityEvent'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /builders:
+    get:
+      tags:
+      - Configuration
+      summary: List available builders
+      operationId: get_list_available_builders_builders
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericList'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /config:
+    get:
+      tags:
+      - Configuration
+      summary: Get client configuration
+      operationId: get_get_client_configuration_config
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /admin/settings:
+    get:
+      tags:
+      - Admin
+      summary: Get admin settings
+      operationId: get_get_admin_settings_admin_settings
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+      - Admin
+      summary: Update admin settings
+      operationId: patch_update_admin_settings_admin_settings
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /admin/settings/test-github-app:
+    post:
+      tags:
+      - Admin
+      summary: Test GitHub App settings
+      operationId: post_test_github_app_settings_admin_settings_test_github_app
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /admin/settings/test-smtp:
+    post:
+      tags:
+      - Admin
+      summary: Test SMTP settings
+      operationId: post_test_smtp_settings_admin_settings_test_smtp
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /admin/data-safety:
+    get:
+      tags:
+      - Admin
+      summary: Get system data-safety state
+      operationId: get_get_system_data_safety_state_admin_data_safety
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /admin/update:
+    get:
+      tags:
+      - Admin
+      summary: Get update state
+      operationId: get_get_update_state_admin_update
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /admin/update/check:
+    post:
+      tags:
+      - Admin
+      summary: Check for RailDock updates
+      operationId: post_check_for_raildock_updates_admin_update_check
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /admin/update/apply:
+    post:
+      tags:
+      - Admin
+      summary: Apply RailDock update
+      operationId: post_apply_raildock_update_admin_update_apply
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /admin/update/auto-update:
+    patch:
+      tags:
+      - Admin
+      summary: Update automatic-update preference
+      operationId: patch_update_automatic_update_preference_admin_update_auto_update
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /github_app/manifest:
+    post:
+      tags:
+      - GitHub App
+      summary: Create GitHub App manifest flow
+      operationId: post_create_github_app_manifest_flow_github_app_manifest
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+  /github_app/callback:
+    get:
+      tags:
+      - GitHub App
+      summary: Handle GitHub App callback
+      operationId: get_handle_github_app_callback_github_app_callback
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+      security: []
+  /github_app/setup:
+    get:
+      tags:
+      - GitHub App
+      summary: Handle GitHub App setup callback
+      operationId: get_handle_github_app_setup_callback_github_app_setup
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+      security: []
+  /github_app/installation:
+    delete:
+      tags:
+      - GitHub App
+      summary: Remove GitHub App installation
+      operationId: delete_remove_github_app_installation_github_app_installation
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Authentication required or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /github_app/webhook:
+    post:
+      tags:
+      - GitHub App
+      summary: Receive GitHub App webhook
+      operationId: post_receive_github_app_webhook_github_app_webhook
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: false
+        description: null
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      security: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT returned by POST /login.
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+      - error
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        time:
+          type: string
+          format: date-time
+      required:
+      - status
+      - time
+    User:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        email:
+          type: string
+          format: email
+        name:
+          type:
+          - string
+          - 'null'
+    LoginRequest:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      required:
+      - token
+      - user
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+    Project:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        name:
+          type: string
+        server_id:
+          type:
+          - integer
+          - string
+          - 'null'
+        organization_id:
+          type:
+          - integer
+          - string
+          - 'null'
+    Environment:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        name:
+          type: string
+        project_id:
+          type:
+          - integer
+          - string
+    Service:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        name:
+          type: string
+        service_type:
+          type:
+          - string
+          - 'null'
+        subtype:
+          type:
+          - string
+          - 'null'
+        status:
+          type:
+          - string
+          - 'null'
+        builder:
+          type:
+          - string
+          - 'null'
+        git_repo:
+          type:
+          - string
+          - 'null'
+        branch:
+          type:
+          - string
+          - 'null'
+        docker_image:
+          type:
+          - string
+          - 'null'
+        port:
+          type:
+          - integer
+          - string
+          - 'null'
+        locked:
+          type:
+          - boolean
+          - 'null'
+        auto_deploy:
+          type:
+          - boolean
+          - 'null'
+        root_directory:
+          type:
+          - string
+          - 'null'
+        start_command:
+          type:
+          - string
+          - 'null'
+    Server:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        name:
+          type: string
+        host:
+          type:
+          - string
+          - 'null'
+        status:
+          type:
+          - string
+          - 'null'
+        proxy:
+          type:
+          - string
+          - 'null'
+        public_ip:
+          type:
+          - string
+          - 'null'
+    Organization:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        name:
+          type: string
+    Deployment:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        status:
+          type:
+          - string
+          - 'null'
+        service_id:
+          type:
+          - integer
+          - string
+        created_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    ManifestDocument:
+      type: object
+      properties:
+        content:
+          type: string
+        format:
+          type: string
+        drift:
+          type:
+          - boolean
+          - 'null'
+        last_synced_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        last_applied_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+      additionalProperties: true
+    Backup:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        status:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    BackupSchedule:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        schedule:
+          type:
+          - string
+          - 'null'
+        enabled:
+          type:
+          - boolean
+          - 'null'
+    ActivityEvent:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - integer
+          - string
+        action:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+    GenericObject:
+      type: object
+      additionalProperties: true
+    GenericList:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+    RunCommandRequest:
+      type: object
+      required:
+      - command
+      properties:
+        command:
+          type: string
+    DeleteConfirmation:
+      type: object
+      properties:
+        confirmation:
+          type: string
+          description: Typed confirmation value required by destructive paths.
+security:
+- bearerAuth: []
+x-raildock-source:
+  repository: https://github.com/mona-chen/raildock
+  researchedAt: '2026-09-19'
+  status: derived-reference

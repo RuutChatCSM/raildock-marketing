@@ -1,0 +1,31 @@
+# Replace raildock.example.com with the production hostname.
+raildock.example.com {
+    encode zstd gzip
+
+    # Holocron is an SSR Node server. The docs build is configured with base=/docs/.
+    @docs path /docs /docs/*
+    handle @docs {
+        reverse_proxy 127.0.0.1:3000
+    }
+
+    redir /api-reference /api-reference/ 308
+    handle_path /api-reference/* {
+        root * /srv/raildock-site/api-reference/dist
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Marketing pages are static and use directory indexes.
+    handle {
+        root * /srv/raildock-site/marketing
+        try_files {path} {path}/ /404.html
+        file_server
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        # Add a tested CSP after choosing analytics/telemetry and any third-party assets.
+    }
+}

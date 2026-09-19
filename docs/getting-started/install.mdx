@@ -1,0 +1,37 @@
+---
+title: Install RailDock
+description: Bootstrap RailDock and its local deployment target on a Linux server.
+---
+
+# Install RailDock
+
+The standard installer is the shortest path to a working RailDock control plane. It checks the host, installs or validates Docker and Dokku, creates RailDock's SSH identity and application secrets, starts the RailDock container, and creates the local server record.
+
+## Requirements
+
+Use a Linux host you administer and make sure RailDock's dashboard port is available. The standard setup serves the dashboard on **port 8888**.
+
+## Run the installer
+
+```bash
+curl -sSL https://raw.githubusercontent.com/mona-chen/raildock/main/install.sh | bash
+```
+
+After installation, open:
+
+```text
+http://YOUR_SERVER_IP:8888
+```
+
+Complete the initial account setup, then validate the pre-created **Local Dokku** server.
+
+## Back up the control-plane secrets
+
+Keep recoverable copies of the generated `.env` and `backend/config/master.key` in your normal secrets/backup system. Do not commit them to source control. These files are part of RailDock's control-plane recovery material.
+
+## Next steps
+
+1. Read [Your first project](/getting-started/first-project).
+2. Configure a production hostname and TLS strategy.
+3. Add a remote server if the control plane should manage workloads elsewhere.
+4. Configure organization-level backup destinations before treating production data as protected.

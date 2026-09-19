@@ -1,0 +1,16 @@
+---
+title: External proxy mode
+description: Integrate RailDock with an existing edge proxy.
+---
+
+# External proxy mode
+
+RailDock includes proxy configuration helpers and Traefik label generation for environments where the edge is managed separately from the control plane.
+
+## When to use it
+
+Use external proxy mode when your infrastructure already has a central ingress/TLS layer and RailDock should emit or cooperate with routing metadata instead of owning the complete edge path itself.
+
+## Verify the contract
+
+Document which component owns DNS, certificates, ports, service discovery, and health checking. Split ownership is workable only when the boundary is explicit.

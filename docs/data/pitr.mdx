@@ -1,0 +1,19 @@
+---
+title: Point-in-time recovery
+description: Configure and exercise PITR controls for supported RailDock datastores.
+---
+
+# Point-in-time recovery
+
+RailDock exposes PITR configuration and removal endpoints as part of the service recovery surface. PITR support and exact semantics depend on the datastore and recovery backend.
+
+## Before enabling PITR
+
+- Confirm the datastore type/version is supported by your RailDock release.
+- Configure and verify an appropriate recovery destination.
+- Confirm retention and storage expectations.
+- Run an isolated recovery drill before relying on PITR for production.
+
+## Recovery preferences
+
+Service recovery preferences are separate from the base service record. Keep recovery policy explicit, review it after datastore upgrades, and include the recovery path in your operating runbook.

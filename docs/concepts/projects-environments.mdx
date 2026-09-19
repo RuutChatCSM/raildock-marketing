@@ -1,0 +1,20 @@
+---
+title: Projects and environments
+description: How RailDock groups workloads and isolates desired state.
+---
+
+# Projects and environments
+
+Projects group services that should be operated as one application boundary. Environments let that project hold distinct service state without mixing configuration.
+
+## Project-level operations
+
+The API exposes project activity, shared variables, deploy-all, cancel-deployments, restart-all, and stop-all operations. Deploy-all resolves service dependencies before execution.
+
+## Environment lifecycle
+
+Environments can be created, updated, removed, duplicated, previewed for synchronization, and synchronized. Use environments to keep distinct desired states explicit instead of encoding deployment stage only in ad-hoc variable names.
+
+## Server placement
+
+A project is assigned to a server. RailDock can manage multiple servers from one control plane, but does not currently schedule a single project across multiple hosts.

@@ -1,0 +1,41 @@
+---
+title: Troubleshooting
+description: A disciplined workflow for diagnosing RailDock deployments and servers.
+---
+
+# Troubleshooting
+
+Start at the narrowest failing layer and move outward. Avoid reinstalling or rebuilding everything before you know which boundary is broken.
+
+## A service will not start
+
+1. Open the latest deployment and logs.
+2. Confirm source/image and expected start command.
+3. Confirm required environment variables exist.
+4. Check the configured exposed port.
+5. Check linked datastore health and project networking.
+6. Review restart policy and container state.
+
+## A domain does not route
+
+1. Confirm the service itself is healthy privately.
+2. Check DNS against the server's public ingress.
+3. Check domain configuration on the service.
+4. Inspect proxy mode and generated configuration.
+5. Validate the server and relevant networks.
+
+## A server fails provisioning
+
+Use the server connectivity test first, then review provisioning status. Confirm SSH access, supported Linux environment, Docker/Dokku state, and proxy-mode assumptions.
+
+## A manifest will not apply
+
+Run preview/sync-plan and inspect validation errors. Check whether the plan contains removals that require confirmation, then inspect manifest status and drift.
+
+## Recovery concerns
+
+Do not attempt a destructive restore blindly. Verify the destination, identify the backup/PITR target, and use an isolated recovery drill when possible.
+
+## Report a bug
+
+When opening a GitHub issue, include the RailDock release/commit, affected service type, sanitized logs, the action you attempted, and the smallest reproducible sequence. Never paste secrets.

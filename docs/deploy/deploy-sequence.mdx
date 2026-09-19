@@ -1,0 +1,22 @@
+---
+title: Deployment sequencing
+description: How RailDock orders dependent services during project-wide deployments.
+---
+
+# Deployment sequencing
+
+Project-wide deployment is dependency-aware. RailDock builds a service graph and uses topological ordering so prerequisites can be dispatched before services that depend on them.
+
+```text
+postgres ─┐
+          ├──> api ──> web
+redis ────┘
+```
+
+## Why ordering matters
+
+A service graph makes relationships explicit and lets RailDock avoid an arbitrary loop over service records. This is especially useful when applications consume connection data from declared datastore links.
+
+## Cancel and retry
+
+The project API includes cancellation of active project deployments, while individual deployment resources expose cancellation as well. After a failed sequence, inspect the failing service logs and state before retrying the whole graph.

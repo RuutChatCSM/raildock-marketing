@@ -1,0 +1,16 @@
+---
+title: Logs and terminal
+description: Observe services and run targeted commands through RailDock.
+---
+
+# Logs and terminal
+
+Use service logs to diagnose build, release, startup, and runtime failures. The service API also exposes run-command and terminal/enter operations for targeted inspection.
+
+## Prefer a narrow operation
+
+Use logs and metrics before opening a terminal. When a command is needed, run the smallest diagnostic action that answers the current question. Interactive shell access is powerful and should be treated as production access.
+
+## One-shot commands
+
+`POST .../run` requires a command. Use it for bounded administration or diagnosis and keep durable configuration in manifests, service configuration, or source control instead of shell history.

@@ -1,0 +1,25 @@
+---
+title: Data safety and destructive actions
+description: RailDock guardrails for deletion, backups, credentials, and recovery.
+---
+
+# Data safety and destructive actions
+
+RailDock makes several destructive paths explicit. Project and service deletion can require typed confirmation, and project deletion may return a precondition response when a snapshot/safety step is still required.
+
+## Treat the control plane as privileged infrastructure
+
+RailDock can mutate application, network, and datastore state on attached hosts. Protect the RailDock host, database, Rails master key, SSH material, Git integration credentials, backup destination credentials, and administrator sessions accordingly.
+
+## Before deleting production data
+
+1. Confirm the target name and environment.
+2. Review dependent services.
+3. Create or verify the required snapshot/backup.
+4. Confirm the recovery destination is reachable.
+5. Record the change in your normal change-management workflow.
+6. Only then submit the destructive confirmation.
+
+## Security documentation
+
+This documentation describes visible product controls; it is not a security audit. A production project should also maintain a repository `SECURITY.md` with supported versions and a private disclosure path.

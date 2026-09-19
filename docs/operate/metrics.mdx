@@ -1,0 +1,16 @@
+---
+title: Metrics and host health
+description: Inspect service and server resource signals through RailDock.
+---
+
+# Metrics and host health
+
+Service resources expose current metrics and metrics history. Server resources expose host-level metrics gathered through the host engine, including common load, memory, and filesystem information.
+
+## Use metrics with logs
+
+Metrics tell you **that** resource behavior changed; logs often tell you **why**. During an incident, correlate deployment events, service metrics, server metrics, and runtime logs before making large configuration changes.
+
+## External observability
+
+RailDock's built-in signals are useful for operations but do not replace a dedicated long-retention metrics/logging stack when your reliability requirements call for one.

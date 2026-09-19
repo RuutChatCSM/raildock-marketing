@@ -1,0 +1,31 @@
+---
+title: API authentication
+description: Authenticate to RailDock and use JWT bearer tokens.
+---
+
+# API authentication
+
+Authenticate with the login endpoint, then pass the returned JWT in the `Authorization` header.
+
+## Login
+
+```bash
+curl -X POST https://raildock.example.com/api/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"operator@example.com","password":"..."}'
+```
+
+A successful response includes `token` and `user`.
+
+## Bearer requests
+
+```bash
+curl https://raildock.example.com/api/me \
+  -H "Authorization: Bearer $RAILDOCK_TOKEN"
+```
+
+The backend verifies bearer JWTs using HS256 and resolves the current user before protected actions.
+
+## Token handling
+
+Treat the token as a credential with control-plane privileges. Do not place it in query strings, commit it to scripts, or write it into logs. For non-interactive automation, prefer the purpose-built key/deployment mechanisms available to your RailDock workflow rather than recycling a human session indefinitely.

@@ -1,0 +1,24 @@
+{
+  "name": "raildock-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "RailDock website: marketing, documentation and API reference served as one RailDock service.",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "docs",
+    "api-reference"
+  ],
+  "scripts": {
+    "sync:openapi": "node scripts/sync-openapi.mjs",
+    "build": "npm run build:docs && npm run build:api",
+    "build:docs": "npm --prefix docs run build",
+    "build:api": "npm run sync:openapi && npm --prefix api-reference run build",
+    "start": "node server.mjs",
+    "dev": "node scripts/dev.mjs",
+    "validate": "python3 validate.py && node --check marketing/assets/site.js && node --check api-reference/src/main.js && node --check server.mjs",
+    "clean": "rm -rf docs/dist api-reference/dist"
+  }
+}
