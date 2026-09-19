@@ -2,7 +2,7 @@
 #
 # One service. `server.mjs` is a unified Node gateway that serves:
 #   /               -> marketing/ (static)
-#   /docs/          -> the Holocron SSR server (spawned on DOCS_PORT)
+#   /docs/          -> the Holocron SSR server (internal upstream only)
 #   /api-reference/ -> api-reference/dist (Scalar SPA)
 #   /_up            -> health check
 #
@@ -10,7 +10,9 @@
 # static publish_directory. `npm run build` builds both Vite apps and
 # `npm start` runs the gateway.
 #
-# Replace the domain with the real production hostname before applying.
+# The gateway binds `$PORT`; the internal Holocron upstream is placed on a port
+# above it so RailDock's port detection resolves the public domain to the
+# gateway, never the docs server.
 
 [[services]]
 name = "raildock-web"
@@ -19,8 +21,7 @@ subtype = "web"
 builder = "nixpacks"
 source = { type = "git", repo = "https://github.com/RuutChatCSM/raildock-marketing.git", branch = "main" }
 start_command = "node server.mjs"
-port = 3000
-domains = ["raildock.example.com"]
+domains = ["raildock.xyz"]
 auto_deploy = true
 
 [services.scaling]
@@ -39,4 +40,3 @@ timeout = 20
 [services.env]
 NODE_ENV = "production"
 NIXPACKS_NODE_VERSION = "22"
-DOCS_PORT = "3001"

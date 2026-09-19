@@ -13,7 +13,21 @@ const DOCS_ENTRY = join(ROOT, 'docs', 'dist', 'rsc', 'index.js')
 
 const HOST = process.env.HOST || '0.0.0.0'
 const PORT = Number(process.env.PORT || 3000)
-const DOCS_PORT = Number(process.env.DOCS_PORT || 3001)
+
+// The Holocron server always binds 0.0.0.0 (spiceflow ignores HOST), so both it
+// and this gateway show up as all-interface listeners inside the container.
+// RailDock's PortDetector picks the smallest listening port to decide what the
+// proxy should target — if the docs port were lower than PORT it would route
+// the public domain at the docs server. Keep the internal docs port above the
+// gateway port so detection resolves to the gateway.
+function resolveDocsPort(port) {
+  const explicit = Number(process.env.DOCS_PORT || 0)
+  if (explicit > port && explicit < 65536) return explicit
+  if (port < 65535) return port + 1
+  return 65535
+}
+
+const DOCS_PORT = resolveDocsPort(PORT)
 
 function proxyDocs(req, res) {
   const upstream = httpRequest(
@@ -86,7 +100,7 @@ const server = createServer((req, res) => {
 })
 
 server.listen(PORT, HOST, () => {
-  console.log(`[web] listening on http://${HOST}:${PORT}`)
+  console.log(`[web] listening on http://${HOST}:${PORT} (docs upstream :${DOCS_PORT})`)
 })
 
 let docsProc = null

@@ -53,14 +53,14 @@ npm run build
 npm start
 ```
 
-`npm run build` builds Holocron (`docs/dist/rsc/index.js`) and Scalar (`api-reference/dist`). `npm start` runs `server.mjs`, which serves marketing and the API reference statically and spawns the Holocron Node server on `DOCS_PORT` (default `3001`).
+`npm run build` builds Holocron (`docs/dist/rsc/index.js`) and Scalar (`api-reference/dist`). `npm start` runs `server.mjs`, which serves marketing and the API reference statically and spawns the Holocron Node server on an internal upstream port above `PORT`.
 
 Holocron uses `docs/dist` as its dev cache, so `npm run dev` replaces the production build there. Always run `npm run build` before `npm start` (RailDock does this automatically).
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `PORT` | `3000` | Public gateway port (RailDock/Dokku set this). |
-| `DOCS_PORT` | `3001` | Internal Holocron server port. |
+| `DOCS_PORT` | `PORT + 1` | Internal Holocron upstream. Must stay **above** `PORT`: RailDock's port detection picks the lowest all-interface listener, so a lower docs port would expose the docs server instead of the gateway. |
 | `HOST` | `0.0.0.0` | Gateway bind address. |
 
 ### Running a single app
@@ -90,11 +90,10 @@ subtype = "web"
 builder = "nixpacks"
 source = { type = "git", repo = "https://github.com/RuutChatCSM/raildock-marketing.git", branch = "main" }
 start_command = "node server.mjs"
-port = 3000
-domains = ["raildock.example.com"]
+domains = ["raildock.xyz"]
 ```
 
-Set `domains` to the real production hostname before applying. The service exposes `/_up` for health checks. A single service is required because RailDock routes by host (`Host()` rules), not by path prefix, and Holocron is SSR-only.
+The service exposes `/_up` for health checks. A single service is required because RailDock routes by host (`Host()` rules), not by path prefix, and Holocron is SSR-only. Keep the gateway as the only low-numbered listener (see `DOCS_PORT` above); otherwise RailDock routes the domain to the docs process and `/` 302s to `/docs/`.
 
 ### Non-RailDock hosting
 
