@@ -8,10 +8,10 @@
     "dark": "#A78BFA"
   },
   "logo": {
-    "light": "/logo.svg",
-    "dark": "/logo.svg"
+    "light": "/raildock-logo.png",
+    "dark": "/raildock-logo-on-dark.png"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.png",
   "appearance": {
     "default": "dark"
   },

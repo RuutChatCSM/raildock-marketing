@@ -1,9 +1,10 @@
 import { createApiReference } from '@scalar/api-reference'
+import '@scalar/api-reference/style.css'
 import './shell.css'
 
 createApiReference('#app', {
   url: '/api-reference/openapi.yaml',
-  theme: 'purple',
+  theme: 'elysiajs',
   layout: 'modern',
   darkMode: true,
   forceDarkModeState: 'dark',
@@ -19,20 +20,9 @@ createApiReference('#app', {
     title: 'RailDock API Reference',
     description: 'Interactive HTTP API reference for the RailDock control plane.',
     ogTitle: 'RailDock API Reference',
-    ogDescription: 'Automate projects, services, deployments, servers, manifests, organizations and recovery workflows.'
+    ogDescription: 'Automate projects, services, deployments, servers, manifests, organizations and recovery workflows.',
+    ogImage: 'https://raildock.xyz/assets/og.png',
+    twitterImage: 'https://raildock.xyz/assets/og.png',
+    twitterCard: 'summary_large_image'
   },
-  customCss: `
-    :root {
-      --scalar-color-1: #f5f5f7;
-      --scalar-color-2: #a1a1aa;
-      --scalar-color-3: #71717a;
-      --scalar-color-accent: #a78bfa;
-      --scalar-background-1: #0b0b0e;
-      --scalar-background-2: #111116;
-      --scalar-background-3: #17171d;
-      --scalar-background-accent: rgba(139, 92, 246, .12);
-      --scalar-border-color: #292932;
-    }
-    .scalar-app { --scalar-header-height: 0px; }
-  `,
 })

@@ -17,14 +17,19 @@ public=DOCS/'public'; public.mkdir(exist_ok=True)
 logo='''<svg width="200" height="44" viewBox="0 0 200 44" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="42" height="42" rx="12" fill="#131318" stroke="#2A2A33"/><path d="M11 14.5C11 12.567 12.567 11 14.5 11H28.8C31.1196 11 33 12.8804 33 15.2V17.4C33 19.7196 31.1196 21.6 28.8 21.6H17.4V33H14.5C12.567 33 11 31.433 11 29.5V14.5Z" fill="#8B5CF6"/><path d="M20.1 24.1H28.65C31.052 24.1 33 26.048 33 28.45V29.1C33 31.254 31.254 33 29.1 33H20.1V24.1Z" fill="#A78BFA"/><path d="M17.4 16.2H27.2" stroke="#F6F3FF" stroke-width="2.2" stroke-linecap="round"/><text x="55" y="28" fill="#F5F5F7" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="650">RailDock</text></svg>'''
 (public/'logo.svg').write_text(logo)
 (public/'favicon.svg').write_text(logo.replace('width="200" height="44" viewBox="0 0 200 44"','width="44" height="44" viewBox="0 0 44 44"').split('<text')[0]+'</svg>')
+# Use the real brand assets (shared with the marketing site) in the docs header.
+brand=ROOT/'marketing'/'assets'
+for _name in ('raildock-logo.png','raildock-logo-on-dark.png','favicon.png'):
+    _src=brand/_name
+    if _src.exists(): shutil.copyfile(_src, public/_name)
 
 nav={
  "$schema":"https://holocron.so/docs.json",
  "name":"RailDock Docs",
  "description":"Deploy and operate applications and databases on servers you control with RailDock.",
  "colors":{"primary":"#8B5CF6","light":"#8B5CF6","dark":"#A78BFA"},
- "logo":{"light":"/logo.svg","dark":"/logo.svg"},
- "favicon":"/favicon.svg",
+ "logo":{"light":"/raildock-logo.png","dark":"/raildock-logo-on-dark.png"},
+ "favicon":"/favicon.png",
  "appearance":{"default":"dark"},
  "fonts":{"family":"Inter"},
  "icons":{"library":"lucide"},
@@ -81,6 +86,18 @@ pages={
 'security/data-safety.mdx':'''---\ntitle: Data safety and destructive actions\ndescription: RailDock guardrails for deletion, backups, credentials, and recovery.\n---\n\n# Data safety and destructive actions\n\nRailDock makes several destructive paths explicit. Project and service deletion can require typed confirmation, and project deletion may return a precondition response when a snapshot/safety step is still required.\n\n## Treat the control plane as privileged infrastructure\n\nRailDock can mutate application, network, and datastore state on attached hosts. Protect the RailDock host, database, Rails master key, SSH material, Git integration credentials, backup destination credentials, and administrator sessions accordingly.\n\n## Before deleting production data\n\n1. Confirm the target name and environment.\n2. Review dependent services.\n3. Create or verify the required snapshot/backup.\n4. Confirm the recovery destination is reachable.\n5. Record the change in your normal change-management workflow.\n6. Only then submit the destructive confirmation.\n\n## Security documentation\n\nThis documentation describes visible product controls; it is not a security audit. A production project should also maintain a repository `SECURITY.md` with supported versions and a private disclosure path.\n''',
 'troubleshooting.mdx':'''---\ntitle: Troubleshooting\ndescription: A disciplined workflow for diagnosing RailDock deployments and servers.\n---\n\n# Troubleshooting\n\nStart at the narrowest failing layer and move outward. Avoid reinstalling or rebuilding everything before you know which boundary is broken.\n\n## A service will not start\n\n1. Open the latest deployment and logs.\n2. Confirm source/image and expected start command.\n3. Confirm required environment variables exist.\n4. Check the configured exposed port.\n5. Check linked datastore health and project networking.\n6. Review restart policy and container state.\n\n## A domain does not route\n\n1. Confirm the service itself is healthy privately.\n2. Check DNS against the server's public ingress.\n3. Check domain configuration on the service.\n4. Inspect proxy mode and generated configuration.\n5. Validate the server and relevant networks.\n\n## A server fails provisioning\n\nUse the server connectivity test first, then review provisioning status. Confirm SSH access, supported Linux environment, Docker/Dokku state, and proxy-mode assumptions.\n\n## A manifest will not apply\n\nRun preview/sync-plan and inspect validation errors. Check whether the plan contains removals that require confirmation, then inspect manifest status and drift.\n\n## Recovery concerns\n\nDo not attempt a destructive restore blindly. Verify the destination, identify the backup/PITR target, and use an isolated recovery drill when possible.\n\n## Report a bug\n\nWhen opening a GitHub issue, include the RailDock release/commit, affected service type, sanitized logs, the action you attempted, and the smallest reproducible sequence. Never paste secrets.\n'''
 }
+seo_tags=[('og:image','https://raildock.xyz/assets/og.png'),('og:image:width','1200'),('og:image:height','630'),('twitter:image','https://raildock.xyz/assets/og.png'),('twitter:card','summary_large_image')]
+
+def with_seo(txt):
+    # Inject shared social/SEO frontmatter into every page's frontmatter block.
+    txt=txt.strip()
+    if not txt.startswith('---'): return txt+"\n"
+    parts=txt.split('\n---\n',1)
+    if len(parts)!=2: return txt+"\n"
+    head,body=parts
+    extra=''.join(f'"{k}": "{v}"\n' for k,v in seo_tags if f'"{k}":' not in head)
+    return head+'\n'+extra+'---\n'+body.rstrip()+"\n"
+
 for rel,txt in pages.items():
-    p=DOCS/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(txt.strip()+"\n")
+    p=DOCS/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(with_seo(txt))
 print(f'Wrote {len(pages)} Holocron MDX pages')
